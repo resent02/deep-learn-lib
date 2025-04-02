@@ -4,7 +4,7 @@ Loss function measures how good predictions
 
 import numpy as np
 
-from src.tensor import Tensor
+from deep_learn_lib.utils.tensor import Tensor
 
 
 class Loss:

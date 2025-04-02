@@ -2,7 +2,7 @@ from typing import Callable, Dict
 
 import numpy as np
 
-from src.tensor import Tensor
+from deep_learn_lib.utils.tensor import Tensor
 
 
 class Layer:

@@ -1,4 +1,4 @@
-from src.nn import SequentialNet
+from deep_learn_lib.nn import SequentialNet
 
 
 class Optimizer:

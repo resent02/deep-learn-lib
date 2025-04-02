@@ -1,6 +1,6 @@
 from typing import Iterator, Sequence, Tuple
 
-from src.layers import Layer
+from deep_learn_lib.layers.layers import Layer
 from src.tensor import Tensor
 
 

@@ -1,7 +1,7 @@
 import numpy as np
 
-from src.layers import Linear, Tanh
-from src.nn import SequentialNet
+from deep_learn_lib.layers.layers import Linear, Tanh
+from deep_learn_lib.nn import SequentialNet
 
 X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])  # Xor
 y = np.array([[0], [1], [1], [0]])
