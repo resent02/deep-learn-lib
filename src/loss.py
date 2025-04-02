@@ -18,10 +18,11 @@ class Loss:
 class MSE(Loss):
     """
     Mean Squared error
+    mse = 1/n * sum[(predicted-actual)^2]
     """
 
     def loss(self, predicted: Tensor, actual: Tensor) -> float:
-        return np.sum((predicted - actual) ** 2)
+        return np.mean((predicted - actual) ** 2)
 
     def grad(self, predicted: Tensor, actual: Tensor) -> Tensor:
-        return 2 * (predicted - actual)
+        return 2 * (predicted - actual) / np.size(predicted)  # Added normalization
