@@ -1,7 +1,7 @@
 from typing import Iterator, Sequence, Tuple
 
 from deep_learn_lib.layers.layers import Layer
-from src.tensor import Tensor
+from deep_learn_lib.utils import Tensor
 
 
 class SequentialNet:
