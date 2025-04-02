@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Callable, Dict
 
 import numpy as np
 
@@ -57,3 +57,27 @@ class Linear(Layer):
         self.grads["b"] = np.sum(grad, axis=0)
         self.grads["w"] = self.inputs.T @ grad
         return grad @ self.params["w"].T
+
+
+F = Callable[[Tensor], Tensor]
+
+
+class Activation(Layer):
+    def __init__(self, f: F, f_prime: F) -> None:
+        super().__init__()
+        self.f = f
+        self.f_prime = f_prime
+
+
+def tanh(x: Tensor) -> Tensor:
+    return np.tanh(x)
+
+
+def tanh_prime(x: Tensor) -> Tensor:
+    y = tanh(x)
+    return 1 - y**2
+
+
+class Tanh(Activation):
+    def __init__(self):
+        super().__init__(tanh, tanh_prime)
