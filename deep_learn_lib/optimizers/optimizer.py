@@ -7,6 +7,11 @@ class Optimizer:
 
 
 class SGD(Optimizer):
+    """
+    Stochastic Gradient Descent
+    w = w - lr * dy/dw
+    """
+
     def __init__(self, lr: float = 0.001):
         self.lr = lr
 

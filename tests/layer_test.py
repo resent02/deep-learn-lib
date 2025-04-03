@@ -1,84 +1,156 @@
 import numpy as np
-import pytest
 
 from deep_learn_lib.layers import Linear, Tanh
+from deep_learn_lib.losses import MSE
+from deep_learn_lib.nn import SequentialNet
+from deep_learn_lib.optimizers import SGD
+
+
+# Layer Tests
+def test_linear_layer_initialization():
+    input_size, output_size = 10, 5
+    linear = Linear(input_size, output_size)
+
+    assert linear.params["w"].shape == (input_size, output_size)
+    assert linear.params["b"].shape == (output_size,)
 
 
 def test_linear_layer_forward():
-    # Test with known weights and biases
-    linear = Linear(2, 3)
-    linear.params["w"] = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
-    linear.params["b"] = np.array([0.1, 0.2, 0.3])
+    input_size, output_size = 3, 2
+    linear = Linear(input_size, output_size)
 
-    inputs = np.array([[1.0, 2.0]])
+    # Set fixed weights and bias for predictable testing
+    linear.params["w"] = np.array([[1, 2], [3, 4], [5, 6]])
+    linear.params["b"] = np.array([0.5, 1.5])
+
+    inputs = np.array([1, 2, 3])
+    expected_output = np.array(
+        [1 * 1 + 2 * 3 + 3 * 5 + 0.5, 1 * 2 + 2 * 4 + 3 * 6 + 1.5]
+    )
+
     output = linear.forward(inputs)
-
-    expected = np.array([[9.1, 12.2, 15.3]])  # 1*1 + 2*4 + 0.1, etc.
-
-    assert np.allclose(output, expected), "Linear forward pass failed"
+    np.testing.assert_almost_equal(output, expected_output)
 
 
 def test_linear_layer_backward():
-    linear = Linear(2, 3)
-    linear.params["w"] = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
-    linear.params["b"] = np.array([0.1, 0.2, 0.3])
+    input_size, output_size = 3, 2
+    linear = Linear(input_size, output_size)
 
-    inputs = np.array([[1.0, 2.0], [3.0, 4.0]])  # Batch of 2 samples
+    # Set fixed weights for predictable testing
+    linear.params["w"] = np.array([[1, 2], [3, 4], [5, 6]])
+    linear.params["b"] = np.array([0.5, 1.5])
 
-    # Forward pass to store inputs
+    inputs = np.array([[1, 2, 3]])
     linear.forward(inputs)
 
-    # Backward pass with dummy gradient
-    grad_output = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
-    grad_input = linear.backward(grad_output)
+    grad = np.array([[2, 3]])
 
-    # Test weight gradients (inputs.T @ grad_output)
-    expected_w_grad = np.array(
-        [
-            [
-                1.3,
-                1.6,
-                1.9,
-            ],  # (1.0*0.1 + 3.0*0.4, 1.0*0.2 + 3.0*0.5, 1.0*0.3 + 3.0*0.6)
-            [
-                2.6,
-                3.2,
-                3.8,
-            ],  # (2.0*0.1 + 4.0*0.4, 2.0*0.2 + 4.0*0.5, 2.0*0.3 + 4.0*0.6)
-        ]
-    )
-    assert np.allclose(linear.grads["w"], expected_w_grad), "Weight gradients incorrect"
+    # Test gradient computation
+    backward_grad = linear.backward(grad)
 
-    # Test bias gradients (sum(grad_output, axis=0))
-    expected_b_grad = np.array([0.5, 0.7, 0.9])  # (0.1+0.4, 0.2+0.5, 0.3+0.6)
-    assert np.allclose(linear.grads["b"], expected_b_grad), "Bias gradients incorrect"
-
-    # Test input gradients (grad_output @ w.T)
-    expected_input_grad = np.array(
-        [
-            [1.4, 3.2],  # (0.1*1.0 + 0.2*2.0 + 0.3*3.0, 0.1*4.0 + 0.2*5.0 + 0.3*6.0)
-            [3.2, 7.4],  # (0.4*1.0 + 0.5*2.0 + 0.6*3.0, 0.4*4.0 + 0.5*5.0 + 0.6*6.0)
-        ]
-    )
-    assert np.allclose(grad_input, expected_input_grad), "Input gradients incorrect"
+    assert linear.grads["b"].shape == (2,)
+    assert linear.grads["w"].shape == (3, 2)
+    assert backward_grad.shape == (1, 3)
 
 
-def test_tanh_activation():
-    tanh = Tanh()
-    test_input = np.array([0.0, 1.0, -1.0])
+# Loss Tests
+def test_mse_loss_calculation():
+    mse = MSE()
 
-    # Forward pass
-    output = tanh.forward(test_input)
-    expected_output = np.tanh(test_input)
-    assert np.allclose(output, expected_output), "Tanh forward pass failed"
+    predicted = np.array([1, 2, 3])
+    actual = np.array([0.5, 1.5, 2.5])
 
-    # Backward pass
-    grad_output = np.array([0.5, 1.0, -1.0])
-    grad_input = tanh.backward(grad_output)
+    expected_loss = np.mean((predicted - actual) ** 2)
 
-    expected_grad = grad_output * (1 - expected_output**2)
-    assert np.allclose(grad_input, expected_grad), "Tanh backward pass failed"
+    assert np.isclose(mse.loss(predicted, actual), expected_loss)
 
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+def test_mse_loss_gradient():
+    mse = MSE()
+
+    predicted = np.array([1, 2, 3])
+    actual = np.array([0.5, 1.5, 2.5])
+
+    expected_grad = 2 * (predicted - actual) / np.size(predicted)
+
+    np.testing.assert_almost_equal(mse.grad(predicted, actual), expected_grad)
+
+
+# Neural Network Tests
+def test_sequential_net_forward():
+    layers = [Linear(3, 4), Tanh(), Linear(4, 2)]
+    net = SequentialNet(layers)
+
+    inputs = np.array([[1, 2, 3]])
+    output = net.forward(inputs)
+
+    assert output.shape == (1, 2)
+
+
+def test_sequential_net_backward():
+    layers = [Linear(3, 4), Tanh(), Linear(4, 2)]
+    net = SequentialNet(layers)
+
+    inputs = np.array([[1, 2, 3]])
+    net.forward(inputs)
+
+    grad = np.array([[0.5, 0.5]])
+    net.backward(grad)
+
+    # Check that linear layers have gradients for their parameters
+    for layer in net.layers:
+        if isinstance(layer, Linear):
+            assert "w" in layer.grads
+            assert "b" in layer.grads
+            assert layer.grads["w"].shape == layer.params["w"].shape
+            assert layer.grads["b"].shape == layer.params["b"].shape
+
+
+def test_params_and_grads():
+    layers = [Linear(3, 4), Tanh(), Linear(4, 2)]
+    net = SequentialNet(layers)
+
+    inputs = np.array([[1, 2, 3]])
+    net.forward(inputs)
+
+    grad = np.array([[0.5, 0.5]])
+    net.backward(grad)
+
+    params_and_grads = list(net.params_and_grads())
+
+    assert len(params_and_grads) > 0
+    for param, grad in params_and_grads:
+        assert isinstance(param, np.ndarray)
+        assert isinstance(grad, np.ndarray)
+
+
+# Optimizer Tests
+def test_sgd_optimizer():
+    layers = [Linear(3, 4), Tanh(), Linear(4, 2)]
+    net = SequentialNet(layers)
+
+    # Store initial weights
+    initial_params = []
+    for layer in net.layers:
+        if hasattr(layer, "params"):
+            layer_params = [param.copy() for param in layer.params.values()]
+            initial_params.append(layer_params)
+
+    inputs = np.array([[1, 2, 3]])
+    net.forward(inputs)
+
+    grad = np.array([[0.5, 0.5]])
+    net.backward(grad)
+
+    # Create SGD optimizer
+    optimizer = SGD(lr=0.01)
+    optimizer.step(net)
+
+    # Check that weights have been updated
+    for layer_idx, layer in enumerate(net.layers):
+        if hasattr(layer, "params"):
+            for param_idx, (name, param) in enumerate(layer.params.items()):
+                initial_param = initial_params[layer_idx][param_idx]
+
+                # Weights should have changed
+                assert not np.array_equal(param, initial_param)

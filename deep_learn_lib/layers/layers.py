@@ -46,12 +46,12 @@ class Linear(Layer):
         if y = f(x) and x = a*b + c
         then dy/da = f'(x) * b
         and dy/db = f'(x) * a
-        and dy\dc = f'(x)
+        and dy/dc = f'(x)
 
         if y = f(x) and x = a @ b + c
         then dy/da = f'(x) @ b.T
         and dy/db = a.T @ f'(x)
-        and dy\dc = f'(x)
+        and dy/dc = f'(x)
         """
 
         self.grads["b"] = np.sum(grad, axis=0)
@@ -67,6 +67,13 @@ class Activation(Layer):
         super().__init__()
         self.f = f
         self.f_prime = f_prime
+
+    def forward(self, inputs: Tensor) -> Tensor:
+        self.inputs = inputs
+        return self.f(inputs)
+
+    def backward(self, grad: Tensor) -> Tensor:
+        return self.f_prime(self.inputs) * grad
 
 
 def tanh(x: Tensor) -> Tensor:
