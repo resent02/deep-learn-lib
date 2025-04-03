@@ -1,25 +1,3 @@
-# Deep Learn Lib
-
-A lightweight deep learning library built from scratch with NumPy. Implements layers, loss functions, and optimizers for educational and research purposes.
-
-## Installation
-
-### Prerequisites
-- Python 3.11+
-- NumPy
-
-### Option 1: Install from source (recommended for development)
-```bash
-git clone 
-cd deep_learn_lib
-pip install -e .  # Editable install
-```
-
-
-
-## Quick Start
-
-```python
 import numpy as np
 
 from deep_learn_lib.layers import Linear, Tanh
@@ -58,5 +36,3 @@ for epoch in range(100):
 
     # Update weights
     optimizer.step(model)
-
-```
