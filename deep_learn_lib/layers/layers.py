@@ -88,3 +88,16 @@ def tanh_prime(x: Tensor) -> Tensor:
 class Tanh(Activation):
     def __init__(self):
         super().__init__(tanh, tanh_prime)
+
+
+def sigm(x: Tensor) -> Tensor:
+    return 1 / (1 + np.exp(-x))
+
+
+def sigm_prime(x: Tensor) -> Tensor:
+    return sigm(x) * (1 - sigm(x))
+
+
+class Sigmoid(Activation):
+    def __init__(self):
+        super().__init__(sigm, sigm_prime)

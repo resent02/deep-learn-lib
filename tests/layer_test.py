@@ -1,6 +1,6 @@
 import numpy as np
 
-from deep_learn_lib.layers import Linear, Tanh
+from deep_learn_lib.layers import Linear, Sigmoid, Tanh
 from deep_learn_lib.losses import MSE
 from deep_learn_lib.nn import SequentialNet
 from deep_learn_lib.optimizers import SGD
@@ -154,3 +154,15 @@ def test_sgd_optimizer():
 
                 # Weights should have changed
                 assert not np.array_equal(param, initial_param)
+
+
+def test_sigmoid_activation():
+    x = np.array([1, 10, 100])
+    cor_f = np.array([0.731058578630074, 0.9999546021312978, 1])
+    cor_f_prime = np.array([0.19661193324144993, 0.00004539580773568563, 0])
+
+    o1 = Sigmoid().f(x)
+    o2 = Sigmoid().f_prime(x)
+
+    np.testing.assert_almost_equal(o1, cor_f)
+    np.testing.assert_almost_equal(o2, cor_f_prime)

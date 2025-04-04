@@ -1,3 +1,3 @@
-from deep_learn_lib.layers.layers import Linear, Tanh
+from deep_learn_lib.layers.layers import Linear, Sigmoid, Tanh
 
-__all__ = ["Linear", "Tanh"]
+__all__ = ["Linear", "Tanh", "Sigmoid"]
