@@ -9,6 +9,7 @@ class Layer:
     def __init__(self) -> None:
         self.params: Dict[str, Tensor] = {}
         self.grads: Dict[str, Tensor] = {}
+        self.velocity : Dict[str,Tensor] = {}
 
     def forward(self, inputs: Tensor) -> Tensor:
         """
@@ -32,6 +33,8 @@ class Linear(Layer):
 
         self.params["w"] = np.random.randn(input_size, output_size)
         self.params["b"] = np.random.randn(output_size)
+        self.velocity["w"] = np.zeros((input_size, output_size))
+        self.velocity["b"] = np.zeros(output_size)
 
     def forward(self, inputs: Tensor) -> Tensor:
         """
