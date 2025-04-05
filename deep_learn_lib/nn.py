@@ -23,3 +23,11 @@ class SequentialNet:
             for name, param in layer.params.items():
                 grad = layer.grads[name]
                 yield param, grad
+
+#TODO: make it DRY cause its repeating 
+    def params_and_velocities(self) -> Iterator[Tuple[Tensor, Tensor, Tensor]]:
+        for layer in self.layers:
+            for name, param in layer.params.items():
+                grad = layer.grads[name]
+                velocity = layer.velocity[name]
+                yield param, grad, velocity
